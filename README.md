@@ -14,7 +14,7 @@ ansible-playbook -s server.yml --extra-vars "aegir_mysql_host=[amazon RDS DB] ae
 Deployment
 ----------
 
-We'll use packer.yml to make images with as much stuff installed as possible. We'll use full.yml in prod.
+We'll use the  _packer .yml files to make images with as much stuff installed as possible. We'll use the _full .yml files on running and new instances.
 
 
 
