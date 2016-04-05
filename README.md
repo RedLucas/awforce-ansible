@@ -9,7 +9,7 @@ Testing
 -------
 
 To test this in Vagrant, you'll need to specify the SQL user, host and password. In prod it would be something like this:
-ansible-playbook -s server.yml --extra-vars "aegir_mysql_host=[amazon RDS DB] aegir_mysql_user=[amazon RDS user] aegir_mysql_password=[amazon RDS password]"
+ansible-playbook -s [whichever]_full.yml --extra-vars "aegir_mysql_host=[amazon RDS DB] aegir_mysql_user=[amazon RDS user] aegir_mysql_password=[amazon RDS password]"
 
 Deployment
 ----------
