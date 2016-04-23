@@ -15,12 +15,11 @@
     sudo: yes
     sudo_user: aegir
   # TODO: Clone hosting_saas_utils from github
-  # TODO: Clone hosting_rest_api from github
+  # TODO: Enable
 
+  # This is not used here, it's used when we aggregate this info on the hub.
   - name: Get credentials for remote authentication
-    script: ./generate_credentials.sh {{ inventory_hostname }}
+    script: ./generate_credentials.sh
     sudo: yes
     sudo_user: aegir
-    register: network_node_credentials
-
-  - debug: var=network_node_credentials.stdout verbosity=2
+    register: "network_node_credentials"

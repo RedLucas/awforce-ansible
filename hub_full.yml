@@ -11,6 +11,11 @@
 - hosts: aegir3
   roles:
     - aegir3-nginx
+
 - hosts: aegir3-saas
   roles:
-    - aegir3-saas
+      - {role: aegir3-saas, tags: saas}
+
+- hosts: aegir3-saas-hub
+  roles:
+      - {role: aegir3-saas-hub, tags: hub}
