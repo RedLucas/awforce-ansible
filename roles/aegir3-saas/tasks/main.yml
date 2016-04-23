@@ -1,9 +1,10 @@
 ---
   - name: Check if custom hostmaster modules are installed
     shell: "[ -d `/var/aegir/hostmaster-*/sites/{{ inventory_hostname }}/modules/hosting_saas`]"
-    register: aegir_custom_modules_exist
     failed_when: '"found" in aegir_custom_modules_exist.stderr'
-    ignore_errors: yes
+    changed_when: False
+    ignore_errors: True
+    register: aegir_custom_modules_exist
 
   # Download the saas modules and enable them.
   # largely based on https://praxis.coop/en/blog/automated-drupal-saas-aegir3
@@ -22,4 +23,5 @@
     script: ./generate_credentials.sh
     sudo: yes
     sudo_user: aegir
+    changed_when: False
     register: "network_node_credentials"

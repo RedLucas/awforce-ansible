@@ -1,16 +1,19 @@
 ---
 - hosts: all
   roles:
-    - common
+    - {role: common, tags: common}
   sudo: yes
 
 - hosts: mysql-servers
   roles:
-    - mysql-server
+    - {role: mysql-server, tags: mysqlserver}
+  sudo: yes
 
 - hosts: aegir3
   roles:
     - aegir3-nginx
+    - {role: aegir3-nginx, tags: aegir3nginx}
+
 - hosts: aegir3-saas
   roles:
-    - aegir3-saas
+    - {role: aegir3-saas, tags: saas}

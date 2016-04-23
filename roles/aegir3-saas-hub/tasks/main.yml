@@ -3,7 +3,8 @@
     shell: "[ -d `/var/aegir/hostmaster-*/sites/{{ inventory_hostname }}/modules/hosting_network`]"
     register: aegir_custom_modules_exist
     failed_when: '"found" in aegir_custom_modules_exist.stderr'
-    ignore_errors: yes
+    changed_when: False
+    ignore_errors: True
 
   - name: Download the SaaS modules from drupal.org
     shell: drush @hostmaster dl hosting_network
