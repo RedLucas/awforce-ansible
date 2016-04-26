@@ -15,8 +15,9 @@
     - {role: aegir3-nginx, tags: aegir3nginx}
 
 - hosts: aegir3-saas
-  roles:
-    - {role: aegir3-saas, tags: saas}
+#  roles:
+#    - {role: aegir3-saas, tags: saas}
+#  Leave out the aegir3-saas role, we don't want to configure the nodes, we just want to aggregate their data
 
 - hosts: aegir3-saas-hub
   roles:
