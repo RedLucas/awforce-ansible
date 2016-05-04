@@ -6,8 +6,37 @@
     changed_when: False
     ignore_errors: True
 
+  - name: Figure out the hostmaster root
+    shell: "drush @hostmaster status |grep 'Drupal root' |awk '{ print $NF }'"
+    register: aegir_siteroot
+    sudo: yes
+    sudo_user: aegir
+
+  - debug: msg={{ aegir_siteroot.stdout }}
+
   - name: Download the SaaS modules from drupal.org
-    shell: drush @hostmaster dl hosting_network
+    shell: drush dl -y {{ item }}
+    args:
+      chdir: '{{ aegir_siteroot.stdout }}/sites/{{ inventory_hostname }}'
+    with_items:
+      - features
+      - hosting_network
+      - libraries
+      - oauth
+      - services
+    when: aegir_custom_modules_exist|failed
+    sudo: yes
+    sudo_user: aegir
+  # TODO: Download features, enable modules
+
+  - name: Enable the modules
+    shell: drush @hostmaster en -y {{ item }}
+    with_items:
+      - libraries
+      - features
+      - oauth_common
+      - services
+      - hosting_network
     when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir

@@ -1,22 +1,56 @@
 ---
   - name: Check if custom hostmaster modules are installed
-    shell: "[ -d `/var/aegir/hostmaster-*/sites/{{ inventory_hostname }}/modules/hosting_saas`]"
+    shell: "[ -d `/var/aegir/hostmaster-*/sites/{{ inventory_hostname }}/modules/awforce-aegirnetwork-features`]"
     failed_when: '"found" in aegir_custom_modules_exist.stderr'
     changed_when: False
     ignore_errors: True
     register: aegir_custom_modules_exist
 
-  # Download the saas modules and enable them.
-  # largely based on https://praxis.coop/en/blog/automated-drupal-saas-aegir3
-  # When the modules are consolidated we can simplify this a lot.
-  # See https://www.drupal.org/node/2698053
+  - name: Figure out the hostmaster root
+    shell: "drush @hostmaster status |grep 'Drupal root' |awk '{ print $NF }'"
+    register: aegir_siteroot
+    sudo: yes
+    sudo_user: aegir
+
+  - debug: msg={{ aegir_siteroot.stdout }}
+
   - name: Download the SaaS modules from drupal.org
-    shell: drush @hostmaster dl hosting_variables hosting_saas
+    shell: drush dl -y {{ item }}
+    args:
+      chdir: '{{ aegir_siteroot.stdout }}/sites/{{ inventory_hostname }}'
+    with_items:
+      - features
+      - hosting_services
+      - hosting_variables
+      - libraries
+      - services
+      - services_api_key_auth
     when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir
-  # TODO: Clone hosting_saas_utils from github
-  # TODO: Enable
+    # TODO: merge hosting_saas_utils
+
+  - name: Enable all modules
+    shell: drush @hostmaster en -y {{ item }}
+    with_items:
+      - features
+      - services
+      - libraries
+      - services_api_key_auth
+      - hosting_saas
+      - hosting_services
+    # awforce_ssl
+    # hosting_variables
+    when: aegir_custom_modules_exist|failed
+    sudo: yes
+    sudo_user: aegir
+  # TODO: Add as dependencies to the main feature
+
+  - name: Clear the drush cache
+    shell: drush cc drush
+    when: aegir_custom_modules_exist|failed
+    sudo: yes
+    sudo_user: aegir
 
   # This is not used here, it's used when we aggregate this info on the hub.
   - name: Get credentials for remote authentication

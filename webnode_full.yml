@@ -13,7 +13,9 @@
   roles:
     - aegir3-nginx
     - {role: aegir3-nginx, tags: aegir3nginx}
+  sudo: yes
 
 - hosts: aegir3-saas
   roles:
     - {role: aegir3-saas, tags: saas}
+  sudo: yes

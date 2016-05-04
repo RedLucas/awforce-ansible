@@ -13,12 +13,14 @@
   roles:
     - aegir3-nginx
     - {role: aegir3-nginx, tags: aegir3nginx}
+  sudo: yes
 
 - hosts: aegir3-saas
-#  roles:
-#    - {role: aegir3-saas, tags: saas}
-#  Leave out the aegir3-saas role, we don't want to configure the nodes, we just want to aggregate their data
+  roles:
+    - {role: aegir3-saas, tags: saas}
+  sudo: yes
 
 - hosts: aegir3-saas-hub
   roles:
     - {role: aegir3-saas-hub, tags: hub}
+  sudo: yes
