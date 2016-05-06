@@ -9,9 +9,15 @@
     - {role: mysql-server, tags: mysqlserver}
   sudo: yes
 
-- hosts: aegir3
+- hosts: aegir3-gluster
   roles:
     - {role: aegir3-gluster, tags: aegir3gluster}
+    - {role: aegir3-nginx, tags: aegir3nginx}
+  sudo: yes
+
+- hosts: aegir3-prime
+  roles:
+    - {role: aegir3-prime, tags: aegir3prime}
     - {role: aegir3-nginx, tags: aegir3nginx}
   sudo: yes
 

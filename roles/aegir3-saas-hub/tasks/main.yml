@@ -1,16 +1,17 @@
 ---
-  - name: Check if custom hostmaster modules are installed
-    shell: "[ -d `/var/aegir/hostmaster-*/sites/{{ inventory_hostname }}/modules/hosting_network`]"
-    register: aegir_custom_modules_exist
-    failed_when: '"found" in aegir_custom_modules_exist.stderr'
-    changed_when: False
-    ignore_errors: True
-
   - name: Figure out the hostmaster root
     shell: "drush @hostmaster status |grep 'Drupal root' |awk '{ print $NF }'"
     register: aegir_siteroot
     sudo: yes
     sudo_user: aegir
+    changed_when: False
+
+  - name: Check if custom hostmaster modules are installed
+    shell: "[ -d `{{ aegir_siteroot.stdout }}/sites/{{ inventory_hostname }}/modules/hosting_network`]"
+    register: aegir_custom_modules_exist
+    failed_when: '"found" in aegir_custom_modules_exist.stderr'
+    ignore_errors: True
+    changed_when: False
 
   - debug: msg={{ aegir_siteroot.stdout }}
 
