@@ -11,7 +11,7 @@
 
 - hosts: aegir3
   roles:
-    - aegir3-nginx
+    - {role: aegir3-gluster, tags: aegir3gluster}
     - {role: aegir3-nginx, tags: aegir3nginx}
   sudo: yes
 

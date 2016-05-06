@@ -1,0 +1,71 @@
+---
+  # Create the Aegir group preemptively so we can mount the directory with it
+  - name: Ensure Aegir group exists
+    group: name=aegir gid=2160 state=present
+
+  # Create the Aegir user preemptively so we can mount the directory with it
+  - name: Ensure Aegir user exists
+    user: name=aegir group=aegir groups=www-data uid=2160 shell=/bin/bash home=/var/aegir
+
+  - name: Install gluster and partitioning packages
+    apt: pkg={{ item }} state=installed update_cache=true
+    with_items:
+      - xfsprogs
+      - glusterfs-common
+      - glusterfs-server
+
+  # Gluster volume configuration.
+  - name: Check if Gluster volumes already exist.
+    shell: "gluster volume info"
+    changed_when: false
+    register: gluster_volume_info_check
+
+  - name: Connect to Gluster peers.
+    shell: "gluster peer probe {{ gluster_peer }}"
+    register: gluster_peer_probe
+    when: "'Volume Name: aegir' not in gluster_volume_info_check.stdout"
+    failed_when: false
+
+  # Gluster volume configuration.
+  - name: Check if EBS volume is empty
+    shell: "file -s /dev/xvdh"
+    changed_when: false
+    register: ebs_volume_check
+
+  - name: Format EBS volume if necessary
+    when: "'/dev/xvdh: data' in ebs_volume_check.stdout"
+    shell: "mkfs -t ext4 /dev/xvdh"
+
+  # Make sure the mounting directory exists
+  - file: path=/mnt/aegirvolume state=directory
+
+  # For some reason the mount module is failing us here.
+  - name: Mount EBS volume
+    shell: mount /dev/xvdh /mnt/aegirvolume
+    register: ebs_volume_mounted
+    failed_when: ("ebs_volume_mounted.stderr!=''") and ("'already' not in ebs_volume_mounted.stdout")
+    ignore_errors: true
+
+  # Make sure the brick directory exists
+  - file: path=/mnt/aegirvolume/glusterbrick state=directory
+
+  # We need to pause here otherwise it will run the task on both servers as once
+  - name: Create gluster volume
+    gluster_volume: state=present name=aegirvolume brick=/mnt/aegirvolume/glusterbrick cluster="{{ gluster_peer }}"
+    when: "'Volume Name: aegir' not in gluster_volume_info_check.stdout"
+    register: gluster_volumed_created
+
+  - name: Start gluster volume
+    gluster_volume: state=started name=aegirvolume
+    register: gluster_volume_started
+
+  ## Set gluster things here
+  - shell: "gluster volume set aegirvolume storage.owner-uid 2160"
+    changed_when: false
+  - shell: "gluster volume set aegirvolume storage.owner-gid 2160"
+    changed_when: false
+
+  # Mounting the volume as localhost
+  - name: Mount Aegir directory
+    mount: name=/var/aegir src='127.0.0.1:/aegirvolume' fstype=glusterfs state=present
+    when: gluster_volume_started

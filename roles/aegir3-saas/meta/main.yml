@@ -1,3 +1,4 @@
 ---
 dependencies:
+  - { role: aegir3-gluster }
   - { role: aegir3-nginx }
