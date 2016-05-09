@@ -11,7 +11,9 @@
     when: "'Volume Name: aegir' not in gluster_volume_info_check.stdout"
     failed_when: false
 
-  # We need to pause here otherwise it will run the task on both servers as once
+  # Make sure the brick directory exists
+  - file: path=/mnt/aegirvolume/glusterbrick state=directory
+
   - name: Create gluster volume
     gluster_volume: state=present name=aegirvolume brick=/mnt/aegirvolume/glusterbrick cluster="{{ gluster_peer }}"
     when: "'Volume Name: aegir' not in gluster_volume_info_check.stdout"

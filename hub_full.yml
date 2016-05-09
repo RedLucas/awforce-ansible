@@ -2,6 +2,7 @@
 - hosts: all
   roles:
     - {role: common, tags: common}
+    - {role: volumes, tags: volumes}
   sudo: yes
 
 - hosts: mysql-servers

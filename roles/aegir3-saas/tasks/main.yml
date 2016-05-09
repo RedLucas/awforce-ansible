@@ -9,7 +9,7 @@
   - debug: msg={{ aegir_siteroot.stdout }}
 
   - name: Check if custom hostmaster modules are installed
-    shell: "[ -d `{{ aegir_siteroot.stdout }}/sites/{{ inventory_hostname }}/modules/hosting_services`]"
+    shell: "[ -d `{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}/modules/hosting_services`]"
     failed_when: '"found" in aegir_custom_modules_exist.stderr'
     changed_when: False
     ignore_errors: True
@@ -18,7 +18,7 @@
   - name: Download the SaaS modules from drupal.org
     shell: drush dl -y {{ item }}
     args:
-      chdir: '{{ aegir_siteroot.stdout }}/sites/{{ inventory_hostname }}'
+      chdir: '{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}'
     with_items:
       - features
       - hosting_services

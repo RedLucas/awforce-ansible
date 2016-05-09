@@ -1,6 +1,6 @@
 {
 {% for host in groups['aegir3-saas'] %}
-  "{{ hostvars[host]['inventory_hostname'] }}": {
+  "{{ hostvars[host]['hostmaster_fqdn'] }}": {
 {{ hostvars[host]['network_node_credentials'].stdout }}
   }
 {% if not loop.last %}

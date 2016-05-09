@@ -9,6 +9,7 @@
     ignore_errors: True
     register: mysqld_exists
 
+  # TODO: Remove this in prod
   # 2) Preseed install options
   - name: Preseed MySQL server root password 1 of 2
     shell: echo "mysql-server mysql-server/root_password password {{ aegir_mysql_password }}" | debconf-set-selections
