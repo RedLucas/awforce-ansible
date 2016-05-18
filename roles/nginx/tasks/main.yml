@@ -12,7 +12,8 @@
       - php5
       - php5-curl
       - php5-gd
-      - php5-mysql
+      - php5-mysqlnd
+      - php5-twig
     when: nginxinstalled|success
     register: php5installed
     notify:
