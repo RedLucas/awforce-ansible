@@ -4,5 +4,4 @@
     - common
     - efs
     - nginx
-    - {role: aegir3-saas-hub, tags: hub}
   sudo: yes
