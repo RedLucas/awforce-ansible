@@ -19,4 +19,4 @@
     when: nginxinstalled|success
     register: php5installed
     notify:
-     - Start webserver
+     - Restart webserver
