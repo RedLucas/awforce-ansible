@@ -1,0 +1,47 @@
+---
+  # Install debian packages
+  - name: Install NFS and partitioning packages
+    apt: pkg={{ item }} state=installed update_cache=true
+    with_items:
+      - xfsprogs
+      - nfs-common
+
+  # Get the correct EFS IP for the subnet
+  - set_fact:
+      efs_ip: "{{hostvars[groups['hub_a'][0]].ip_address}}"
+    when: role == "hub" and hostvars[inventory_hostname].ansible_default_ipv4.network == "172.31.16.0"
+
+  - set_fact:
+      efs_ip: "{{hostvars[groups['hub_b'][0]].ip_address}}"
+    when: role == "hub" and hostvars[inventory_hostname].ansible_default_ipv4.network == "172.31.32.0"
+
+  - set_fact:
+      efs_ip: "{{hostvars[groups['hub_c'][0]].ip_address}}"
+    when: role == "hub" and hostvars[inventory_hostname].ansible_default_ipv4.network == "172.31.0.0"
+
+  - set_fact:
+      efs_ip: "{{hostvars[groups['webnode_a'][0]].ip_address}}"
+    when: role == "webnode" and hostvars[inventory_hostname].ansible_default_ipv4.network == "172.31.16.0"
+
+  - set_fact:
+      efs_ip: "{{hostvars[groups['webnode_b'][0]].ip_address}}"
+    when: role == "webnode" and hostvars[inventory_hostname].ansible_default_ipv4.network == "172.31.32.0"
+
+  - set_fact:
+      efs_ip: "{{hostvars[groups['webnode_c'][0]].ip_address}}"
+    when: role == "webnode" and hostvars[inventory_hostname].ansible_default_ipv4.network == "172.31.0.0"
+
+  - debug: var=efs_ip
+
+  # Create the Aegir group preemptively so we can mount the directory with it
+  - name: Ensure Aegir group exists
+    group: name=aegir gid=2160 state=present
+
+  # Create the Aegir user preemptively so we can mount the directory with it
+  - name: Ensure Aegir user exists
+    user: name=aegir group=aegir groups=www-data uid=2160 shell=/bin/bash home=/var/aegir
+
+  # Make sure the mounting directory exists
+  - file: path=/var/aegir state=directory owner="aegir" group="aegir"
+
+  - mount: name=/var/aegir src={{ efs_ip }}:/ fstype=nfs4 opts=nfsvers=4.1 state=mounted

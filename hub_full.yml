@@ -1,33 +1,17 @@
 ---
 - hosts: all
   roles:
-    - {role: common, tags: common}
-    - {role: volumes, tags: volumes}
+    - common
+    - efs
+    - nginx
   sudo: yes
 
-- hosts: mysql-servers
-  roles:
-    - {role: mysql-server, tags: mysqlserver}
-  sudo: yes
-
-- hosts: aegir3-gluster
-  roles:
-    - {role: aegir3-gluster, tags: aegir3gluster}
-    - {role: aegir3-nginx, tags: aegir3nginx}
-  sudo: yes
-
-- hosts: aegir3-prime
-  roles:
-    - {role: aegir3-prime, tags: aegir3prime}
-    - {role: aegir3-nginx, tags: aegir3nginx}
-  sudo: yes
-
-- hosts: aegir3-saas
+- hosts: aegir3-webnode
   roles:
     - {role: aegir3-saas, tags: saas}
   sudo: yes
 
-- hosts: aegir3-saas-hub
+- hosts: aegir3-hub
   roles:
     - {role: aegir3-saas-hub, tags: hub}
   sudo: yes

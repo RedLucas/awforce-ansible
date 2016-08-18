@@ -1,9 +1,0 @@
----
-  # We assume that this runs after the original has created the node.
-
-  # Make sure the brick directory exists
-  - file: path=/mnt/aegirvolume/glusterbrick state=directory
-
-  # Mounting the volume as localhost
-  - name: Mount Aegir directory
-    mount: name=/var/aegir src='127.0.0.1:/aegirvolume' fstype=glusterfs state=present

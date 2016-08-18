@@ -23,7 +23,9 @@
       - features
       - hosting_services
       - hosting_variables
+      - hosting_saas
       - libraries
+      - oauth
       - services
       - services_api_key_auth
     when: aegir_custom_modules_exist|failed
@@ -35,11 +37,16 @@
     shell: drush @hostmaster en -y {{ item }}
     with_items:
       - features
-      - services
-      - libraries
-      - services_api_key_auth
+      - hosting_network
       - hosting_saas
       - hosting_services
+      - hosting_variables
+      - libraries
+      - oauth
+      - oauth_common
+      - oauth_common_providerui
+      - services
+      - services_api_key_auth
     # awforce_ssl
     # hosting_variables
     when: aegir_custom_modules_exist|failed

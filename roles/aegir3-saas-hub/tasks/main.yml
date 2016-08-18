@@ -21,10 +21,13 @@
       chdir: '{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}'
     with_items:
       - features
-      - hosting_network
+      - hosting_services
+      - hosting_variables
+      - hosting_saas
       - libraries
       - oauth
       - services
+      - services_api_key_auth
     when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir
@@ -33,11 +36,17 @@
   - name: Enable the modules
     shell: drush @hostmaster en -y {{ item }}
     with_items:
-      - libraries
       - features
-      - oauth_common
-      - services
       - hosting_network
+      - hosting_saas
+      - hosting_services
+      - hosting_variables
+      - libraries
+      - oauth
+      - oauth_common
+      - oauth_common_providerui
+      - services
+      - services_api_key_auth
     when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir

@@ -1,0 +1,5 @@
+---
+- hosts: efs
+  roles:
+    - efs
+  sudo: yes
