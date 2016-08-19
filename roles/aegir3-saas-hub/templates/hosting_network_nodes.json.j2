@@ -1,5 +1,5 @@
 {
-{% for host in groups['aegir3-saas'] %}
+{% for host in groups['aegir3_saas'] %}
   "{{ hostvars[host]['hostmaster_fqdn'] }}": {
 {{ hostvars[host]['network_node_credentials'].stdout }}
   }

@@ -1,0 +1,21 @@
+---
+drush_dl:
+  - features
+  - hosting_services
+  - hosting_variables
+  - libraries
+  - oauth
+  - services
+  - services_api_key_auth
+
+drush_en:
+  - features
+  - hosting_network
+  - hosting_saas
+  - hosting_services
+  - hosting_variables
+  - libraries
+  - oauth_common
+  - oauth_common_providerui
+  - services
+  - services_api_key_auth

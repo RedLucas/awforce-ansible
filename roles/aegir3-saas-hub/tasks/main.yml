@@ -6,51 +6,27 @@
     sudo_user: aegir
     changed_when: False
 
-  - name: Check if custom hostmaster modules are installed
-    shell: "[ -d `{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}/modules/hosting_network`]"
-    register: aegir_custom_modules_exist
-    failed_when: '"found" in aegir_custom_modules_exist.stderr'
-    ignore_errors: True
-    changed_when: False
-
   - debug: msg={{ aegir_siteroot.stdout }}
 
   - name: Download the SaaS modules from drupal.org
-    shell: drush dl -y {{ item }}
+    shell: drush @hm dl -y {{ drush_dl | join(" ") }}
     args:
       chdir: '{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}'
-    with_items:
-      - features
-      - hosting_services
-      - hosting_variables
-      - hosting_saas
-      - libraries
-      - oauth
-      - services
-      - services_api_key_auth
-    when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir
-  # TODO: Download features, enable modules
 
-  - name: Enable the modules
-    shell: drush @hostmaster en -y {{ item }}
-    with_items:
-      - features
-      - hosting_network
-      - hosting_saas
-      - hosting_services
-      - hosting_variables
-      - libraries
-      - oauth
-      - oauth_common
-      - oauth_common_providerui
-      - services
-      - services_api_key_auth
-    when: aegir_custom_modules_exist|failed
+  - name: Enable all modules
+    shell: drush @hm en -y {{ drush_en | join(" ") }}
+    # awforce_ssl
+    # hosting_variables
     sudo: yes
     sudo_user: aegir
-  # TODO: Download features, enable modules
+  # TODO: Add as dependencies to the main feature
 
   - name: Write hosting server import file
     template: src=hosting_network_nodes.json.j2 dest=/tmp/hosting_network_nodes.json owner=aegir group=www-data
+
+  - name: Import hosting network variables
+    shell: drush @hm hn-is -y /tmp/hosting_network_nodes.json
+    sudo: yes
+    sudo_user: aegir

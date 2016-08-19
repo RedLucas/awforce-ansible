@@ -8,55 +8,23 @@
 
   - debug: msg={{ aegir_siteroot.stdout }}
 
-  - name: Check if custom hostmaster modules are installed
-    shell: "[ -d `{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}/modules/hosting_services`]"
-    failed_when: '"found" in aegir_custom_modules_exist.stderr'
-    changed_when: False
-    ignore_errors: True
-    register: aegir_custom_modules_exist
-
   - name: Download the SaaS modules from drupal.org
-    shell: drush dl -y {{ item }}
+    shell: drush @hm dl -y {{ drush_dl | join(" ") }}
     args:
       chdir: '{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}'
-    with_items:
-      - features
-      - hosting_services
-      - hosting_variables
-      - hosting_saas
-      - libraries
-      - oauth
-      - services
-      - services_api_key_auth
-    when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir
-    # TODO: merge hosting_saas_utils
 
   - name: Enable all modules
-    shell: drush @hostmaster en -y {{ item }}
-    with_items:
-      - features
-      - hosting_network
-      - hosting_saas
-      - hosting_services
-      - hosting_variables
-      - libraries
-      - oauth
-      - oauth_common
-      - oauth_common_providerui
-      - services
-      - services_api_key_auth
+    shell: drush @hm en -y {{ drush_en | join(" ") }}
     # awforce_ssl
     # hosting_variables
-    when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir
   # TODO: Add as dependencies to the main feature
 
   - name: Clear the drush cache
     shell: drush cc drush
-    when: aegir_custom_modules_exist|failed
     sudo: yes
     sudo_user: aegir
 

@@ -1,17 +1,26 @@
 ---
-- hosts: all
+- hosts: 
+    - role_hub
+    - role_webnode
   roles:
     - common
     - efs
     - nginx
   sudo: yes
 
-- hosts: aegir3-webnode
+- hosts: 
+    - aegir3_hub
+    - aegir3_webnode
+  roles:
+    - aegir3-nginx
+  sudo: yes
+    
+- hosts: aegir3_webnode
   roles:
     - {role: aegir3-saas, tags: saas}
   sudo: yes
 
-- hosts: aegir3-hub
+- hosts: aegir3_hub
   roles:
     - {role: aegir3-saas-hub, tags: hub}
   sudo: yes
