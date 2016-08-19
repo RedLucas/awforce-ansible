@@ -10,12 +10,9 @@ drush_dl:
 
 drush_en:
   - features
-  - hosting_network
+  - hosting_network_node
   - hosting_saas
-  - hosting_services
-  - hosting_variables
   - libraries
-  - oauth_common
-  - oauth_common_providerui
-  - services
-  - services_api_key_auth
+  - hosting_alias
+  - hosting_clone
+  - hosting_migrate

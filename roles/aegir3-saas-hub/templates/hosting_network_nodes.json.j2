@@ -1,7 +1,7 @@
 {
-{% for host in groups['aegir3_saas'] %}
+{% for host in groups['aegir3_webnode'] %}
   "{{ hostvars[host]['hostmaster_fqdn'] }}": {
-{{ hostvars[host]['network_node_credentials'].stdout }}
+    {{ hostvars[host]['network_node_credentials'].stdout }}
   }
 {% if not loop.last %}
   ,

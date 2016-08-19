@@ -34,4 +34,5 @@
     sudo: yes
     sudo_user: aegir
     changed_when: False
-    register: "network_node_credentials"
+    register: network_node_credentials
+  - debug: var=network_node_credentials

@@ -1,5 +1,6 @@
 ---
-- hosts: 
+- name: verify base congiguration
+  hosts: 
     - role_hub
     - role_webnode
   roles:
@@ -8,19 +9,22 @@
     - nginx
   sudo: yes
 
-- hosts: 
+- name: install aegir
+  hosts: 
     - aegir3_hub
     - aegir3_webnode
   roles:
     - aegir3-nginx
   sudo: yes
-    
-- hosts: aegir3_webnode
+
+- name: configure webnode
+  hosts: aegir3_webnode
   roles:
     - {role: aegir3-saas, tags: saas}
   sudo: yes
 
-- hosts: aegir3_hub
+- name: configure hub
+  hosts: aegir3_hub
   roles:
     - {role: aegir3-saas-hub, tags: hub}
   sudo: yes

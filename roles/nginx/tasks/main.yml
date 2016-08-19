@@ -20,3 +20,4 @@
     register: php5installed
     notify:
      - Restart webserver
+# todo: install composer
