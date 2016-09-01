@@ -1,0 +1,70 @@
+---
+aegir_user_home: /var/aegir
+aegir_user_name: aegir
+
+aegir_drush_packages:
+  provision: 7.x-3.x
+  registry_rebuild: 7.x-2.3
+
+nginx_remove_default_vhost: true
+nginx_ppa_use: true
+nginx_ppa_version: stable
+
+nodejs_version: "4.x"
+nodejs_install_npm_user: aegir
+nodejs_npm_global_packages:
+  - name: bower
+  - name: gulp-cli
+
+php_version: "5.6"
+php_conf_paths:
+  - /etc/php/5.6/fpm
+  - /etc/php/5.6/cli
+php_extension_conf_paths:
+  - /etc/php/5.6/fpm/conf.d
+  - /etc/php/5.6/cli/conf.d
+php_fpm_daemon: php5.6-fpm
+php_fpm_conf_path: "/etc/php/5.6/fpm"
+php_packages:
+  - php5.6
+  - php5.6-bcmath
+  - php5.6-cli
+  - php5.6-common
+  - php5.6-curl
+  - php5.6-fpm
+  - php5.6-gd
+  - php5.6-intl
+  - php5.6-json
+  - php5.6-mbstring
+  - php5.6-mcrypt
+  - php5.6-mysql
+  - php5.6-opcache
+  - php5.6-apcu
+  - php5.6-xml
+  - php-memcached
+  - php-mysql
+  - php-redis
+  - php-xml
+php_memcached_package: php-memcached
+php_mysql_package: php5.6-mysql
+php_redis_package: php-redis
+php_date_timezone: "America/Vancouver"
+php_memory_limit: "256M"
+php_max_execution_time: 300
+php_max_input_time: 300
+php_max_input_vars: 4000
+php_display_errors: On
+php_display_startup_errors: On
+php_realpath_cache_size: "1M"
+php_realpath_cache_ttl: 3600
+php_sendmail_path: "/opt/mailhog/mhsendmail"
+php_opcache_enable: 1
+php_opcache_enable_cli: 1
+php_opcache_memory_consumption: 512
+php_opcache_max_accelerated_files: 1000000
+php_enable_apc: true
+php_enable_php_fpm: true
+php_fpm_listen: "unix:/var/run/php5-fpm.sock"
+php_webserver_daemon: nginx
+
+newrelic_license_key: 28050894e8776dbcba572aaaa80efc213af92c81

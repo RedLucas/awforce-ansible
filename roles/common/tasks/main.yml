@@ -2,12 +2,11 @@
   - name: Install common packages
     apt: pkg={{ item }} state=installed update_cache=true
     with_items:
+      - build-essential
       - curl
-      - fail2ban
-      - git
       - htop
       - ntp
-      - npm
+      - openssl
       - tree
       - vim
 

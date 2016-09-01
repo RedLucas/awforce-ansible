@@ -1,50 +1,20 @@
 ---
-  - name: Check if Aegir is installed
-    shell: "[ -d /var/aegir/config ]"
-    changed_when: False
-    ignore_errors: True
-    register: aegir_user_exists
-
-  - name: Preseed Aegir web server
-    shell: echo "debconf aegir/webserver string nginx" | debconf-set-selections
-    when: aegir_user_exists|failed
-  - name: Preseed Aegir hostmaster site url
-    shell: echo "debconf aegir/site string {{ hostmaster_fqdn }}" | debconf-set-selections
-    when: aegir_user_exists|failed
-  - name: Preseed Aegir hostmaster db_host
-    shell: echo "debconf aegir/db_host string {{ aegir_mysql_host }}" | debconf-set-selections
-    when: aegir_user_exists|failed
-  - name: Preseed Aegir hostmaster db_user
-    shell: echo "debconf aegir/db_user string {{ aegir_mysql_user }}" | debconf-set-selections
-    when: aegir_user_exists|failed
-  - name: Preseed Aegir hostmaster db_password
-    shell: echo "debconf aegir/db_password password {{ aegir_mysql_password }}" | debconf-set-selections
-    when: aegir_user_exists|failed
-
-  - name: Install apt repo management packages
-    apt: pkg={{ item }} state=installed update_cache=true
+  - name: Remove conflicting configuration from Geerlingguy's template.    server_names_hash_bucket_size 64;
+    lineinfile:
+      dest: '{{ nginx_conf_file_path }}'
+      line: '{{ item }}'
+      state: absent
     with_items:
-      - debian-keyring
-      - debian-archive-keyring
-      - python-software-properties
-    register: basicaptpackagesinstalled
+      - "    server_names_hash_bucket_size 64;"
+      - "    log_format  main  '$remote_addr - $remote_user [$time_local] \"$request\" '"
+      - "                      '$status $body_bytes_sent \"$http_referer\" '"
+      - "                      '\"$http_user_agent\" \"$http_x_forwarded_for\"';"
+      - "    access_log  {{ nginx_access_log }};"
 
-  - name: Install aegir3 repo apt key
-    apt_key: url=http://debian.aegirproject.org/key.asc state=present
-    when: basicaptpackagesinstalled|success
-    register: aegir3keyinstalled
-    # Bug in changed status when --check?
-    changed_when: false
+  - name: Check if Aegir is installed
+    stat: 
+      path: "{{ aegir_user_home }}/config"
+    register: aegir_installed
 
-  - name: Install aegir3 repo
-    apt_repository: repo='deb http://debian.aegirproject.org stable main' state=present
-    when: aegir3keyinstalled|success
-    register: aegir3repoinstalled
-
-  # We need to specify nginx so it does "apt-get install nginx aegir3", otherwise the aegir3 package would install apache2
-  - name: Install Aegir3
-    apt: pkg='aegir3,nginx,php5-fpm' state=installed update_cache=true
-    register: aegir3installed
-    when: aegir3keyinstalled|success
-    notify:
-      - Restart webserver
+  - include: install_aegir.yml
+    # when: not aegir_installed.stat.exists

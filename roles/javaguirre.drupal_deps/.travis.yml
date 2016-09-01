@@ -1,0 +1,30 @@
+---
+language: python
+python: "2.7"
+before_install:
+ - sudo apt-get update -qq
+ - sudo apt-get install -qq python-apt python-pycurl
+
+install:
+  - pip install ansible>=1.6.0
+
+  - "{ echo '[defaults]'; echo 'roles_path = ../'; } >> ansible.cfg"
+
+  - ansible-galaxy install geerlingguy.drush
+
+script:
+  # Prepare tests
+  - echo localhost > inventory
+
+  # Check syntax
+  - ansible-playbook --syntax-check -i inventory test.yml
+
+  # First run
+  - ansible-playbook -e "drupal_user=root" -i inventory test.yml --connection=local --sudo
+
+  # Idempotence
+  - >
+    ansible-playbook -e "drupal_user=root" -i inventory test.yml --connection=local --sudo
+    | grep -q 'changed=0.*failed=0'
+    && (echo 'Idempotence test: pass' && exit 0)
+    || (echo 'Idempotence test: fail' && exit 1)

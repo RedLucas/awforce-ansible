@@ -33,14 +33,6 @@
 
   - debug: var=efs_ip
 
-  # Create the Aegir group preemptively so we can mount the directory with it
-  - name: Ensure Aegir group exists
-    group: name=aegir gid=2160 state=present
-
-  # Create the Aegir user preemptively so we can mount the directory with it
-  - name: Ensure Aegir user exists
-    user: name=aegir group=aegir groups=www-data uid=2160 shell=/bin/bash home=/var/aegir
-
   # Make sure the mounting directory exists
   - file: path=/var/aegir state=directory owner="aegir" group="aegir"
 

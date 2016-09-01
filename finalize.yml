@@ -1,30 +1,60 @@
 ---
-- name: verify base congiguration
+- name: Verify default congiguration
   hosts: 
     - role_hub
     - role_webnode
+  become: yes
+  vars_files:
+    - vars/main.yml
+
+  pre_tasks:
+    - name: Add apt key for Debian
+      apt_key: url=https://packages.sury.org/php/apt.gpg state=present
+
+    - name: Add repository for PHP
+      apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
+
+    - name: Update all default packages
+      apt: update_cache=yes upgrade=dist
+
+    - include: tasks/aegir-user.yml
+
   roles:
     - common
+    - geerlingguy.daemonize
+    - geerlingguy.git
+    - geerlingguy.postfix
+    - geerlingguy.nginx
+    - geerlingguy.nodejs
+    - geerlingguy.php
+    - geerlingguy.php-pecl
+    - geerlingguy.php-mysql
+    - geerlingguy.php-pecl
+    - geerlingguy.php-memcached
+    - geerlingguy.php-redis
+    - geerlingguy.composer
+    - geerlingguy.drush
+    - geerlingguy.drupal-console
+    - franklinkim.newrelic
+    - geerlingguy.security
     - efs
-    - nginx
-  sudo: yes
-
+    
 - name: install aegir
+  become: yes
   hosts: 
     - aegir3_hub
     - aegir3_webnode
   roles:
     - aegir3-nginx
-  sudo: yes
 
 - name: configure webnode
+  become: yes
   hosts: aegir3_webnode
   roles:
     - {role: aegir3-saas, tags: saas}
-  sudo: yes
 
 - name: configure hub
+  become: yes
   hosts: aegir3_hub
   roles:
     - {role: aegir3-saas-hub, tags: hub}
-  sudo: yes

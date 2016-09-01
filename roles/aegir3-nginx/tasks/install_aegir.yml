@@ -1,0 +1,101 @@
+- name: Create aegir user ssh key
+  user: 
+    name: "{{ aegir_user_name }}"
+    group: "{{ aegir_user_name }}"
+    groups: www-data
+    uid: 2160
+    shell: /bin/bash
+    home: "{{ aegir_user_home }}"
+    generate_ssh_key: yes
+  register: aegir_ssh
+
+- authorized_key:
+    user: "{{ aegir_user_name }}"
+    key: "{{ aegir_ssh.ssh_public_key }}"
+
+- name: Ensure /var/aegir is owned by aegir user.
+  file:
+    state: directory
+    path: "{{ aegir_user_home }}"
+    group: "{{ aegir_user_name }}"
+    owner: "{{ aegir_user_name }}"
+
+- name: Create aegir's config folder
+  file:
+    path: "{{ aegir_user_home }}/config"
+    owner: "{{ aegir_user_name }}"
+    group: "{{ aegir_user_name }}"
+    state: directory
+    mode: 0755
+
+- name: Create aegir's logs folder
+  file:
+    path: "/var/log/aegir"
+    owner: "{{ aegir_user_name }}"
+    group: "{{ aegir_user_name }}"
+    state: directory
+    mode: 0755
+
+- name: Symbolic link to Aegir's NGINX Config
+  file:
+    src: "{{ aegir_user_home }}/config/nginx.conf"
+    dest: "{{ nginx_conf_path }}/aegir.conf"
+    state: link
+    force: yes
+
+- name: Add aegir user to sudoers to reload NGINX
+  lineinfile:
+    dest: '/etc/sudoers'
+    regexp: '^{{ item }}'
+    line: '{{ item }} ALL=NOPASSWD: /etc/init.d/nginx'
+    state: present
+    validate: 'visudo -cf %s'
+    create: yes
+  with_items:
+    - aegir
+
+- name: Create /var/aegir/.drush
+  file:
+    path: "{{ aegir_user_home }}/.drush"
+    owner: "{{ aegir_user_name }}"
+    group: "{{ aegir_user_name }}"
+    mode: 0744
+    state: directory
+
+- name: Install required drush packages.
+  command: "drush dl {{ item.key }}-{{ item.value }} --destination={{ aegir_user_home }}/.drush -y"
+  with_dict: "{{ aegir_drush_packages }}"
+  become: yes
+  become_user: "{{ aegir_user_name }}"
+
+- name: Setup Drush Bash Enhancements
+  command: "drush init --yes"
+  become: yes
+  become_user: "{{ aegir_user_name }}"
+
+- name: Clear the drush cache.
+  command: "drush cc drush"
+  become: yes
+  become_user: "{{ aegir_user_name }}"
+
+- name: Create makefile
+  template:
+    src: aegir.make.yml.j2
+    dest: "{{ aegir_user_home }}/aegir.make.yml"
+    owner: "{{ aegir_user_name }}"
+    group: "{{ aegir_user_name }}"
+    force: yes
+    mode: 0644
+
+- name: Install Devmaster
+  become: yes
+  become_user: "{{ aegir_user_name }}"
+  command: "drush hostmaster-install {{ hostmaster_fqdn }} --http_service_type=nginx --client_email={{ aegir_admin_email }} --aegir_db_host={{ aegir_mysql_host }} --aegir_db_pass={{ aegir_mysql_password }} --aegir_db_user={{ aegir_mysql_user }} --makefile={{ aegir_user_home }}/aegir.make.yml --aegir_host={{ hostmaster_fqdn }} -y --strict=0"
+  args:
+    creates: "{{ aegir_user_home }}/.drush/hostmaster.alias.drushrc.php"
+
+- name: Ensure Hosting is recognized as enabled
+  shell: drush @hostmaster cc drush
+  become: yes
+  become_user: "{{ aegir_user_name }}"
+  changed_when: False
