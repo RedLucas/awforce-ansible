@@ -52,7 +52,7 @@
     validate: 'visudo -cf %s'
     create: yes
   with_items:
-    - aegir
+    - "{{ aegir_user_name }}"
 
 - name: Create /var/aegir/.drush
   file:
@@ -99,3 +99,13 @@
   become: yes
   become_user: "{{ aegir_user_name }}"
   changed_when: False
+
+- name: Disable overlay
+  shell: drush @hm dis -y overlay
+  become: yes
+  become_user: "{{ aegir_user_name }}"
+
+- name: Enable queued
+  shell: drush @hm en -y hosting_queued
+  become: yes
+  become_user: "{{ aegir_user_name }}"

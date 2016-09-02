@@ -15,9 +15,7 @@
       apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
 
     - name: Ensure apt.conf exists
-      file:
-        path: /etc/apt/apt.conf
-        state: touch
+      shell: "touch /etc/apt/apt.conf creates=/etc/apt/apt.conf" 
 
     - name: Don't install recommended packages
       lineinfile:
@@ -38,7 +36,6 @@
 
   roles:
     - common
-    - geerlingguy.daemonize
     - geerlingguy.git
     - geerlingguy.postfix
     - geerlingguy.nginx

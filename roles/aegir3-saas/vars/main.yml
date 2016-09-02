@@ -8,6 +8,7 @@ drush_dl:
   - oauth
   - services
   - services_api_key_auth
+  - hosting_le
 
 drush_en:
   - features
@@ -17,5 +18,6 @@ drush_en:
   - hosting_alias
   - hosting_clone
   - hosting_migrate
-
-# todo: web pack
+  - hosting_nginx_ssl
+  - hosting_le
+  - hosting_web_pack

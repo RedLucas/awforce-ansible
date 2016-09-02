@@ -2,8 +2,8 @@
   - name: Figure out the hostmaster root
     shell: "drush @hostmaster status |grep 'Drupal root' |awk '{ print $NF }'"
     register: aegir_siteroot
-    sudo: yes
-    sudo_user: aegir
+    become: yes
+    become_user: "{{ aegir_user_name }}"
     changed_when: False
 
   - debug: msg={{ aegir_siteroot.stdout }}
@@ -12,21 +12,43 @@
     shell: drush @hm dl -y {{ drush_dl | join(" ") }}
     args:
       chdir: '{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}'
-    sudo: yes
-    sudo_user: aegir
+    become: yes
+    become_user: "{{ aegir_user_name }}"
 
   - name: Enable all modules
     shell: drush @hm en -y {{ drush_en | join(" ") }}
-    # awforce_ssl
-    # hosting_variables
-    sudo: yes
-    sudo_user: aegir
-  # TODO: Add as dependencies to the main feature
+    become: yes
+    become_user: "{{ aegir_user_name }}"
+
+  - name: Clear the drush cache
+    shell: drush cc drush
+    become: yes
+    become_user: "{{ aegir_user_name }}"
+
+  - name: Create folder for lets encrypt
+    file:
+      path: "{{ aegir_user_home }}/tools/le/.ctrl"
+      owner: "{{ aegir_user_name }}"
+      group: "{{ aegir_user_name }}"
+      mode: 0744
+      state: directory
+
+  - name: Set up lets encrypt pidfile
+    shell: "touch {{ aegir_user_home }}/tools/le/.ctrl/ssl-demo-mode.pid creates={{ aegir_user_home }}/tools/le/.ctrl/ssl-demo-mode.pid" 
+
+  - name: Download lets encrypt
+    get_url:
+      url: https://raw.githubusercontent.com/omega8cc/letsencrypt.sh/master/letsencrypt.sh
+      dest: "{{ aegir_user_home }}/tools/le/letsencrypt.sh"
+      owner: "{{ aegir_user_name }}"
+      group: "{{ aegir_user_name }}"
+      mode: 700
+
 
   - name: Write hosting server import file
-    template: src=hosting_network_nodes.json.j2 dest=/tmp/hosting_network_nodes.json owner=aegir group=www-data
+    template: "src=hosting_network_nodes.json.j2 dest=/tmp/hosting_network_nodes.json owner={{ aegir_user_name }} group={{ nginx_user }}"
 
   - name: Import hosting network variables
     shell: drush @hm hn-is -y /tmp/hosting_network_nodes.json
-    sudo: yes
-    sudo_user: aegir
+    become: yes
+    become_user: "{{ aegir_user_name }}"

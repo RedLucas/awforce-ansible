@@ -21,4 +21,12 @@
     register: aegir_installed
 
   - include: install_aegir.yml
-    # when: not aegir_installed.stat.exists
+    when: not aegir_installed.stat.exists
+
+  - name: Copy queued service definition
+    shell: "cp {{ aegir_user_home }}/.drush/provision/debian/aegir3-hostmaster.hosting-queued.service /lib/systemd/system/hosting-queued.service creates=/lib/systemd/system/hosting-queued.service"
+    become: yes
+
+  - name: Enable queued service
+    service: name=hosting-queued enabled=yes state=started
+    become: yes
