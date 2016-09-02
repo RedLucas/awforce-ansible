@@ -38,12 +38,12 @@
     # - geerlingguy.postfix
     # - geerlingguy.nginx
     # - geerlingguy.nodejs
-    - geerlingguy.php
-    - geerlingguy.php-pecl
-    - geerlingguy.php-mysql
-    - geerlingguy.php-pecl
-    - geerlingguy.php-memcached
-    - geerlingguy.php-redis
+    # - geerlingguy.php
+    # - geerlingguy.php-pecl
+    # - geerlingguy.php-mysql
+    # - geerlingguy.php-pecl
+    # - geerlingguy.php-memcached
+    # - geerlingguy.php-redis
     # - geerlingguy.composer
     # - geerlingguy.drush
     # - geerlingguy.drupal-console
@@ -55,22 +55,11 @@
     - name: Set php-cli version
       become: yes
       shell: update-alternatives --set php /usr/bin/php5.6
-  #   - name: Configure php extension_dir
-  #     lineinfile:
-  #       dest: "{{ item[0] }}/php.ini"
-  #       regexp: "{{ item[1].regexp }}"
-  #       line: "{{ item[1].line }}"
-  #       state: present
-  #     with_nested:
-  #       - "{{ php_conf_paths }}"
-  #       - [ { regexp: "^extension_dir.?=.+$", line: "extension_dir = /usr/lib/php5/20131226" } ]
-  #     when: php_use_managed_ini
-  #     notify: restart webserver
 
-# - name: install aegir
-#   become: yes
-#   hosts: 
-#     - role_webnode
-#   roles:
-#     - aegir3-nginx
-#     - aegir3-saas
+- name: install aegir
+  become: yes
+  hosts: 
+    - role_webnode
+  roles:
+    - aegir3-nginx
+    - aegir3-saas
