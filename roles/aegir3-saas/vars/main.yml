@@ -3,6 +3,7 @@ drush_dl:
   - features
   - hosting_services
   - hosting_variables
+  - hosting_network
   - libraries
   - oauth
   - services

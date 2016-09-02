@@ -9,5 +9,4 @@
       - openssl
       - tree
       - vim
-
-# todo: ln -s /usr/bin/nodejs /usr/bin/node
+      - mariadb-client-10.0

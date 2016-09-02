@@ -1,5 +1,5 @@
 ---
-- name: Verify default congiguration
+- name: Set default congiguration
   become: yes
   vars_files:
     - vars/main.yml
@@ -10,6 +10,21 @@
 
     - name: Add repository for PHP
       apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
+    - name: Ensure apt.conf exists
+      file:
+        path: /etc/apt/apt.conf
+        state: touch
+    - name: Don't install recommended packages
+      lineinfile:
+        dest: /etc/apt/apt.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - regexp: "^APT::Get::Install-Recommends.+$"
+          line: "APT::Get::Install-Recommends \"false\";"
+        - regexp: "^APT::Get::Install-Suggests.+$"
+          line: "APT::Get::Install-Suggests \"false\";"
 
     - name: Update all default packages
       apt: update_cache=yes upgrade=dist
@@ -18,7 +33,6 @@
 
   roles:
     - common
-    - geerlingguy.daemonize
     - geerlingguy.git
     - geerlingguy.postfix
     - geerlingguy.nginx
@@ -34,3 +48,8 @@
     - geerlingguy.drupal-console
     - franklinkim.newrelic
     - geerlingguy.security
+
+  tasks:
+    - name: Set php-cli version
+      become: yes
+      shell: update-alternatives --set php /usr/bin/php5.6

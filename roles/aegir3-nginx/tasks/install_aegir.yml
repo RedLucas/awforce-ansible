@@ -90,7 +90,7 @@
 - name: Install Devmaster
   become: yes
   become_user: "{{ aegir_user_name }}"
-  command: "drush hostmaster-install {{ hostmaster_fqdn }} --http_service_type=nginx --client_email={{ aegir_admin_email }} --aegir_db_host={{ aegir_mysql_host }} --aegir_db_pass={{ aegir_mysql_password }} --aegir_db_user={{ aegir_mysql_user }} --makefile={{ aegir_user_home }}/aegir.make.yml --aegir_host={{ hostmaster_fqdn }} -y --strict=0"
+  command: "drush hostmaster-install --http_service_type=nginx --client_email={{ aegir_admin_email }} --aegir_db_host={{ aegir_mysql_host }} --aegir_db_pass={{ aegir_mysql_password }} --aegir_db_user={{ aegir_mysql_user }} --makefile={{ aegir_user_home }}/aegir.make.yml --aegir_host={{ hostmaster_fqdn }} -y --strict=0"
   args:
     creates: "{{ aegir_user_home }}/.drush/hostmaster.alias.drushrc.php"
 
