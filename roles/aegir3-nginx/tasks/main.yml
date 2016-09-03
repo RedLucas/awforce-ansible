@@ -30,3 +30,19 @@
   - name: Enable queued service
     service: name=hosting-queued enabled=yes state=started
     become: yes
+
+  - name: Create folder for lets encrypt
+    file:
+      path: "{{ aegir_user_home }}/tools/le/.ctrl"
+      owner: "{{ aegir_user_name }}"
+      group: "{{ aegir_user_name }}"
+      mode: 0744
+      state: directory
+
+  - name: Download lets encrypt
+    get_url:
+      url: https://raw.githubusercontent.com/omega8cc/letsencrypt.sh/master/letsencrypt.sh
+      dest: "{{ aegir_user_home }}/tools/le/letsencrypt.sh"
+      owner: "{{ aegir_user_name }}"
+      group: "{{ aegir_user_name }}"
+      mode: 0700
