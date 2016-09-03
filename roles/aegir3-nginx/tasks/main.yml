@@ -33,10 +33,18 @@
 
   - name: Create folder for lets encrypt
     file:
+      path: "{{ aegir_user_home }}/tools/le"
+      owner: "{{ aegir_user_name }}"
+      group: "{{ aegir_user_name }}"
+      mode: 0755
+      state: directory
+
+  - name: Create folder for lets encrypt pid files
+    file:
       path: "{{ aegir_user_home }}/tools/le/.ctrl"
       owner: "{{ aegir_user_name }}"
       group: "{{ aegir_user_name }}"
-      mode: 0744
+      mode: 0755
       state: directory
 
   - name: Download lets encrypt
