@@ -8,11 +8,17 @@
     - vars/main.yml
 
   pre_tasks:
-    - name: Add apt key for Debian
+    - name: Add apt key for  PHP
       apt_key: url=https://packages.sury.org/php/apt.gpg state=present
 
     - name: Add repository for PHP
       apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
+
+    - name: Add apt key for nginx
+      apt_key: url=http://nginx.org/keys/nginx_signing.key state=present
+
+    - name: Add repository for nginx
+      apt_repository: repo='deb http://nginx.org/packages/debian/ {{ ansible_distribution_release }} nginx' update_cache=yes state=present
 
     - name: Ensure apt.conf exists
       shell: "touch /etc/apt/apt.conf creates=/etc/apt/apt.conf" 
@@ -34,8 +40,16 @@
 
     - include: tasks/aegir-user.yml
 
+    # Make sure the ebs is mounted
+    - file: path={{ ebs_mount_dir }} state=directory
+    - mount: name={{ ebs_mount_dir }} src=/dev/xvdh fstype=ext4 opts=defaults passno=2 state=mounted
+    # Make sure that the mount point exists
+    - file: path={{ gluster_brick_dir }} state=directory
+    - file: path={{ gluster_mount_dir }} state=directory owner="aegir" group="aegir"
+
   roles:
     - common
+    - geerlingguy.glusterfs
     - geerlingguy.git
     - geerlingguy.postfix
     - geerlingguy.nginx
@@ -51,28 +65,122 @@
     - geerlingguy.drupal-console
     - franklinkim.newrelic
     - geerlingguy.security
-    - efs
 
   tasks:
     - name: Set php-cli version
       become: yes
       shell: update-alternatives --set php /usr/bin/php5.6
 
+    - name: Remove conflicting configuration from Geerlingguy's template
+      lineinfile:
+        dest: '{{ nginx_conf_file_path }}'
+        line: '{{ item }}'
+        state: absent
+      with_items:
+        - "    server_names_hash_bucket_size 64;"
+        - "    log_format  main  '$remote_addr - $remote_user [$time_local] \"$request\" '"
+        - "                      '$status $body_bytes_sent \"$http_referer\" '"
+        - "                      '\"$http_user_agent\" \"$http_x_forwarded_for\"';"
+        - "    access_log  {{ nginx_access_log }};"
+      notify:
+        - reload nginx
+
+- name: Create hub gluster cluster
+  become: yes
+  vars_files:
+    - vars/main.yml
+  hosts: 
+    - role_hub
+  tasks:
+    - name: Configure Gluster volume.
+      gluster_volume:
+        state: present
+        name: "{{ gluster_brick_name }}"
+        brick: "{{ gluster_brick_dir }}"
+        replicas: 2
+        cluster: "{{ groups.role_hub | join(',') }}"
+        host: "{{ inventory_hostname }}"
+        force: yes
+      run_once: true
+
+    - name: Ensure Gluster volume is mounted.
+      mount:
+        name: "{{ gluster_mount_dir }}"
+        src: "{{ inventory_hostname }}:/{{ gluster_brick_name }}"
+        fstype: glusterfs
+        opts: "defaults,_netdev"
+        state: mounted
+
+- name: Create webnode gluster cluster
+  become: yes
+  vars_files:
+    - vars/main.yml
+  hosts: 
+    - role_webnode
+  tasks:
+    - name: Configure Gluster volume.
+      gluster_volume:
+        state: present
+        name: "{{ gluster_brick_name }}"
+        brick: "{{ gluster_brick_dir }}"
+        replicas: 2
+        cluster: "{{ groups.role_webnode | join(',') }}"
+        host: "{{ inventory_hostname }}"
+        force: yes
+      run_once: true
+
+    - name: Ensure Gluster volume is mounted.
+      mount:
+        name: "{{ gluster_mount_dir }}"
+        src: "{{ inventory_hostname }}:/{{ gluster_brick_name }}"
+        fstype: glusterfs
+        opts: "defaults,_netdev"
+        state: mounted
+
 - name: install aegir
   become: yes
+  vars_files:
+    - vars/main.yml
   hosts: 
     - aegir3_hub
     - aegir3_webnode
   roles:
     - aegir3-nginx
 
+- name: Configure nginx cluster
+  vars_files:
+    - vars/main.yml
+  hosts: 
+    - role_hub
+    - role_webnode
+  become: yes
+  roles:
+    - geerlingguy.nginx
+  tasks:
+    - name: Check symbolic link to Aegir's NGINX Config
+      file:
+        src: "{{ aegir_user_home }}/config/nginx.conf"
+        dest: "{{ nginx_conf_path }}/aegir.conf"
+        state: link
+        force: yes
+      notify:
+        - reload nginx
+
+    - name: "Set hosts file"
+      lineinfile: dest=/etc/hosts regexp='.* {{ hostmaster_fqdn }}$' line="{{ hostvars[inventory_hostname].ansible_default_ipv4.address }} {{ hostmaster_fqdn }}" state=present
+      when: hostvars[inventory_hostname].ansible_default_ipv4.address is defined
+
 - name: configure webnode
+  vars_files:
+    - vars/main.yml
   become: yes
   hosts: aegir3_webnode
   roles:
     - {role: aegir3-saas, tags: saas}
 
 - name: configure hub
+  vars_files:
+    - vars/main.yml
   become: yes
   hosts: aegir3_hub
   roles:
