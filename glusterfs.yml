@@ -20,6 +20,7 @@
 
   roles:
     - geerlingguy.glusterfs
+    - { role: tersmitten.swapfile, swapfile_size: 4GiB, swapfile_file: "{{ ebs_mount_dir }}/swap" }
 
   tasks:
     - name: Configure Gluster volume.

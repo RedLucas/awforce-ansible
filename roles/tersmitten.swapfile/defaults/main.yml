@@ -1,0 +1,5 @@
+# defaults file for swapfile
+---
+swapfile_size: 1G
+swapfile_swappiness: false
+swapfile_vfs_cache_pressure: false

@@ -53,6 +53,7 @@
   roles:
     - common
     - geerlingguy.glusterfs
+    - { role: tersmitten.swapfile, swapfile_size: 4GiB, swapfile_file: "{{ ebs_mount_dir }}/swap" }
     - geerlingguy.git
     - geerlingguy.postfix
     - geerlingguy.nginx
