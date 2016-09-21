@@ -13,6 +13,10 @@
     # Make sure that the mount point exists
     - file: path={{ gluster_brick_dir }} state=directory
     - file: path={{ gluster_mount_dir }} state=directory owner="aegir" group="aegir"
+    - name: Add apt key for gluster
+      apt_key: url=http://download.gluster.org/pub/gluster/glusterfs/LATEST/rsa.pub state=present
+    - name: Add repository for gluster
+      apt_repository: repo='deb https://download.gluster.org/pub/gluster/glusterfs/LATEST/Debian/{{ ansible_distribution_release }}/apt {{ ansible_distribution_release }} main' update_cache=yes state=present
 
   roles:
     - geerlingguy.glusterfs
