@@ -27,6 +27,7 @@ nodejs_npm_global_packages:
   - name: gulp-cli
 
 php_version: "5.6"
+php_expose_php: Off
 php_conf_paths:
   - /etc/php/5.6/fpm
   - /etc/php/5.6/cli
@@ -79,7 +80,8 @@ php_opcache_enable_cli: 1
 php_opcache_memory_consumption: 512
 php_opcache_max_accelerated_files: 1000000
 php_opcache_revalidate_freq: 3600
-php_opcache_validate_timestamps: Off
+php_opcache_validate_timestamps: On
+php_opcache_blacklist_filename: /var/aegir/config/includes/opcache_blacklist.inc
 php_enable_apc: true
 php_enable_php_fpm: true
 php_webserver_daemon: nginx
