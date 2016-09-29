@@ -34,7 +34,7 @@
     owner: "{{ aegir_user_name }}"
     group: "{{ aegir_user_name }}"
     state: directory
-    mode: 0755
+    mode: 0777
 
 - name: Symbolic link to Aegir's NGINX Config
   file:
