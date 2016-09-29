@@ -23,6 +23,7 @@ nginx_conf_path: /etc/nginx/conf.d
 nodejs_version: "4.x"
 nodejs_install_npm_user: aegir
 nodejs_npm_global_packages:
+  - name: npm
   - name: bower
   - name: gulp-cli
 
