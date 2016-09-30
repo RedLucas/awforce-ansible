@@ -6,8 +6,6 @@
     become_user: "{{ aegir_user_name }}"
     changed_when: False
 
-  - debug: msg={{ aegir_siteroot.stdout }}
-
   - name: Download the SaaS modules from drupal.org
     shell: drush @hm dl -y {{ drush_dl | join(" ") }}
     args:
@@ -34,3 +32,4 @@
     register: network_node_credentials
 
   - debug: var=network_node_credentials
+    when: network_node_credentials.exists
