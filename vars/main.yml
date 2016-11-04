@@ -63,6 +63,7 @@ php_packages:
   - php-memcached
   - php-mysql
   - php-redis
+  - php-yaml
   - php-xml
 php_memcached_package: php-memcached
 php_mysql_package: php5.6-mysql
