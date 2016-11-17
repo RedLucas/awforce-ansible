@@ -48,6 +48,7 @@
     - geerlingguy.drush
     - geerlingguy.drupal-console
     - franklinkim.newrelic
+    - franklinkim.php5-newrelic
     - geerlingguy.security
 
   tasks:

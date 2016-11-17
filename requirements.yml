@@ -2,6 +2,8 @@
 - src: javaguirre.drupal_deps
 - src: franklinkim.newrelic
   version: 1.4.0
+- src: franklinkim.php5-newrelic
+  version: 1.2.1
 - src: geerlingguy.composer
   version: 1.4.1
 - src: geerlingguy.daemonize
@@ -32,5 +34,7 @@
   version: 1.4.0
 - src: geerlingguy.glusterfs
   version: 2.1.0
+- src: tersmitten.postfix
+  version: 1.5.1
 - src: tersmitten.swapfile
   version: 1.0.2

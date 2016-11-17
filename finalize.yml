@@ -5,7 +5,7 @@
     - role_webnode
   become: yes
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
 
   pre_tasks:
     - name: Add apt key for  PHP
@@ -54,6 +54,7 @@
     - common
     - geerlingguy.glusterfs
     - { role: tersmitten.swapfile, swapfile_size: 4GiB, swapfile_file: "{{ ebs_mount_dir }}/swap" }
+    - tersmitten.postfix
     - geerlingguy.git
     - geerlingguy.postfix
     - geerlingguy.nginx
@@ -68,6 +69,7 @@
     - geerlingguy.drush
     - geerlingguy.drupal-console
     - franklinkim.newrelic
+    - franklinkim.php5-newrelic
     - geerlingguy.security
 
   tasks:

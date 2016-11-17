@@ -1,8 +1,8 @@
 ---
-- hosts: role_webnode
+- hosts: all
   become: yes
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
 
   # pre_tasks:
   #   - name: Add apt key for Debian
@@ -31,34 +31,28 @@
 
   #   - include: tasks/aegir-user.yml
 
-  # roles:
-  #   - common
-  #   - geerlingguy.git
-  #   - geerlingguy.postfix
-  #   - geerlingguy.nginx
-  #   - geerlingguy.nodejs
-  #   - geerlingguy.php
-  #   - geerlingguy.php-pecl
-  #   - geerlingguy.php-mysql
-  #   - geerlingguy.php-pecl
-  #   - geerlingguy.php-memcached
-  #   - geerlingguy.php-redis
-  #   - geerlingguy.composer
-  #   - geerlingguy.drush
-  #   - geerlingguy.drupal-console
-  #   - franklinkim.newrelic
-  #   - geerlingguy.security
-  #   # - efs
+  roles:
+    # - common
+    # - geerlingguy.git
+    # - geerlingguy.postfix
+    # - geerlingguy.nginx
+    # - geerlingguy.nodejs
+    # - geerlingguy.php
+    # - geerlingguy.php-pecl
+    # - geerlingguy.php-mysql
+    # - geerlingguy.php-pecl
+    # - geerlingguy.php-memcached
+    # - geerlingguy.php-redis
+    # - geerlingguy.composer
+    # - geerlingguy.drush
+    # - geerlingguy.drupal-console
+    # - franklinkim.newrelic
+    # - franklinkim.php5-newrelic
+    # - geerlingguy.security
+    - tersmitten.postfix
+    # - efs
 
   # tasks:
   #   - name: Set php-cli version
   #     become: yes
   #     shell: update-alternatives --set php /usr/bin/php5.6
-
-- name: install aegir
-  become: yes
-  hosts: 
-    - aegir3_webnode
-  roles:
-    # - aegir3-nginx
-    - aegir3-saas
