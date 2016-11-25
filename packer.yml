@@ -44,14 +44,20 @@
     - geerlingguy.php-pecl
     - geerlingguy.php-memcached
     - geerlingguy.php-redis
-    - geerlingguy.composer
-    - geerlingguy.drush
-    - geerlingguy.drupal-console
-    - franklinkim.newrelic
-    - franklinkim.php5-newrelic
     - geerlingguy.security
 
   tasks:
     - name: Set php-cli version
       become: yes
       shell: update-alternatives --set php /usr/bin/php5.6
+
+- hosts: all
+  become: yes
+  vars_files:
+    - ../ansible-vars.yml
+  roles:
+    - geerlingguy.composer
+    - geerlingguy.drush
+    - geerlingguy.drupal-console
+    - franklinkim.newrelic
+    - franklinkim.php5-newrelic
