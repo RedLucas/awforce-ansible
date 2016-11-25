@@ -94,7 +94,7 @@
 - name: Create hub gluster cluster
   become: yes
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
   hosts: 
     - role_hub
   tasks:
@@ -120,7 +120,7 @@
 - name: Create webnode gluster cluster
   become: yes
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
   hosts: 
     - role_webnode
   tasks:
@@ -146,7 +146,7 @@
 - name: install aegir
   become: yes
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
   hosts: 
     - aegir3_hub
     - aegir3_webnode
@@ -155,7 +155,7 @@
 
 - name: Configure nginx cluster
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
   hosts: 
     - role_hub
     - role_webnode
@@ -178,7 +178,7 @@
 
 - name: configure webnode
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
   become: yes
   hosts: aegir3_webnode
   roles:
@@ -186,7 +186,7 @@
 
 - name: configure hub
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
   become: yes
   hosts: aegir3_hub
   roles:

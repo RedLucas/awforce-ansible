@@ -1,9 +1,8 @@
 ---
-- name: Set default congiguration
-  hosts: all
+- hosts: all
   become: yes
   vars_files:
-    - vars/main.yml
+    - ../ansible-vars.yml
 
   pre_tasks:
     - name: Add apt key for Debian
@@ -13,7 +12,7 @@
       apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
 
     - name: Ensure apt.conf exists
-      shell: "touch /etc/apt/apt.conf creates=/etc/apt/apt.conf" 
+      shell: touch /etc/apt/apt.conf creates=/etc/apt/apt.conf 
 
     - name: Don't install recommended packages
       lineinfile:
@@ -34,6 +33,7 @@
 
   roles:
     - common
+    - tersmitten.postfix
     - geerlingguy.git
     - geerlingguy.postfix
     - geerlingguy.nginx
