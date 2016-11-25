@@ -3,13 +3,28 @@ api: 2
 projects:
   hostmaster:
     type: core
-    version: "7.x-3.7"
-  features: {}
-  hosting_services: {}
-  hosting_variables: {}
-  libraries: {}
+    version: "7.x-3.8"
+  features:
+    version: ~
+  devel:
+    version: ~
+  devel_debug_log:
+    version: ~
+  hosting_le:
+    version: "3.x-dev"
+  hosting_network:
+    version: ~
+  hosting_services:
+    version: ~
+  hosting_variables:
+    version: ~
+  libraries:
+    version: ~
   oauth:
     patch:
       - "https://www.drupal.org/files/refactor-DrupalOAuthRequest-1991416-23.patch"
-  services: {}
-  services_api_key_auth: {}
+  services:
+    version: ~
+  services_api_key_auth:
+    version: ~
+
