@@ -5,15 +5,21 @@
     - ../ansible-vars.yml
 
   pre_tasks:
+    # php repo
     - name: Add apt key for Debian
       apt_key: url=https://packages.sury.org/php/apt.gpg state=present
-
     - name: Add repository for PHP
       apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
 
+    # nginx repo
+    - name: Add apt key for nginx
+      apt_key: url=http://nginx.org/keys/nginx_signing.key state=present
+    - name: Add repository for nginx
+      apt_repository: repo='deb http://nginx.org/packages/debian/ {{ ansible_distribution_release }} nginx' update_cache=yes state=present
+
+    # fix apt.conf
     - name: Ensure apt.conf exists
       shell: touch /etc/apt/apt.conf creates=/etc/apt/apt.conf 
-
     - name: Don't install recommended packages
       lineinfile:
         dest: /etc/apt/apt.conf

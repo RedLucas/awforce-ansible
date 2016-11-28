@@ -1,0 +1,136 @@
+---
+- name: Verify default congiguration
+  hosts: 
+    - role_devnode
+  become: yes
+  vars_files:
+    - ../ansible-dev-vars.yml
+
+  pre_tasks:
+    - name: Add apt key for PHP
+      apt_key: url=https://packages.sury.org/php/apt.gpg state=present
+    - name: Add repository for PHP
+      apt_repository: repo='deb https://packages.sury.org/php/ {{ ansible_distribution_release }} main' update_cache=yes state=present
+
+    - name: Add apt key for nginx
+      apt_key: url=http://nginx.org/keys/nginx_signing.key state=present
+    - name: Add repository for nginx
+      apt_repository: repo='deb http://nginx.org/packages/debian/ {{ ansible_distribution_release }} nginx' update_cache=yes state=present
+
+    - name: Ensure apt.conf exists
+      shell: "touch /etc/apt/apt.conf creates=/etc/apt/apt.conf" 
+
+    - name: Don't install recommended packages
+      lineinfile:
+        dest: /etc/apt/apt.conf
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items:
+        - regexp: "^APT::Get::Install-Recommends.+$"
+          line: "APT::Get::Install-Recommends \"false\";"
+        - regexp: "^APT::Get::Install-Suggests.+$"
+          line: "APT::Get::Install-Suggests \"false\";"
+
+    - name: Update all default packages
+      apt: update_cache=yes upgrade=dist
+
+    - include: tasks/aegir-user.yml
+
+    # Make sure the ebs is mounted
+    - file: path={{ ebs_mount_dir }} state=directory
+    - filesystem: fstype=ext4 dev=/dev/xvdh opts="-c" resizefs=yes
+    - mount: name={{ ebs_mount_dir }} src=/dev/xvdh fstype=ext4 opts=defaults passno=2 state=mounted
+
+  roles:
+    - common
+    - { role: tersmitten.swapfile, swapfile_size: 4GiB, swapfile_file: "/swap" }
+    - tersmitten.postfix
+    - geerlingguy.git
+    - geerlingguy.postfix
+    - geerlingguy.nginx
+    - geerlingguy.nodejs
+    - geerlingguy.php
+    - geerlingguy.php-pecl
+    - geerlingguy.php-mysql
+    - geerlingguy.php-pecl
+    - geerlingguy.php-memcached
+    - geerlingguy.php-redis
+    - geerlingguy.security
+
+  tasks:
+    - name: Set php-cli version
+      become: yes
+      shell: update-alternatives --set php /usr/bin/php7.0
+
+    - name: Disable php5.6-fpm
+      become: yes
+      systemd: name=php5.6-fpm enabled=no masked=yes state=stopped
+
+    - name: Enable php7.0-fpm
+      become: yes
+      systemd: name=php7.0-fpm enabled=yes masked=no state=started
+
+    - name: Remove conflicting configuration from Geerlingguy's template
+      lineinfile:
+        dest: '{{ nginx_conf_file_path }}'
+        line: '{{ item }}'
+        state: absent
+      with_items:
+        - "    server_names_hash_bucket_size 64;"
+        - "    log_format  main  '$remote_addr - $remote_user [$time_local] \"$request\" '"
+        - "                      '$status $body_bytes_sent \"$http_referer\" '"
+        - "                      '\"$http_user_agent\" \"$http_x_forwarded_for\"';"
+        - "    access_log  {{ nginx_access_log }};"
+      notify:
+        - reload nginx
+
+- hosts: role_devnode
+  become: yes
+  vars_files:
+    - ../ansible-dev-vars.yml
+  roles:
+    - geerlingguy.composer
+    - geerlingguy.drush
+    - geerlingguy.drupal-console
+    - franklinkim.newrelic
+    - franklinkim.php5-newrelic
+
+- name: install aegir
+  become: yes
+  vars_files:
+    - ../ansible-dev-vars.yml
+  hosts: 
+    - aegir3_devnode
+  roles:
+    - aegir3-nginx
+
+- name: Configure nginx cluster
+  vars_files:
+    - ../ansible-dev-vars.yml
+  hosts: 
+    - role_devnode
+  become: yes
+  roles:
+    - geerlingguy.nginx
+  tasks:
+    - name: Check symbolic link to Aegir's NGINX Config
+      file:
+        src: "{{ aegir_user_home }}/config/nginx.conf"
+        dest: "{{ nginx_conf_path }}/aegir.conf"
+        state: link
+        force: yes
+      notify:
+        - reload nginx
+
+    - name: "Set hosts file"
+      lineinfile: dest=/etc/hosts regexp='.* {{ hostmaster_fqdn }}$' line="{{ hostvars[inventory_hostname].ansible_default_ipv4.address }} {{ hostmaster_fqdn }}" state=present
+      when: hostvars[inventory_hostname].ansible_default_ipv4.address is defined
+
+- name: configure devnode
+  vars_files:
+    - ../ansible-dev-vars.yml
+  become: yes
+  hosts: aegir3_devnode
+  roles:
+    - {role: aegir3-saas, tags: saas}
