@@ -1,0 +1,103 @@
+---
+- name: Configure dev users
+  hosts: all
+  become: yes
+  vars_files:
+    - ../ansible-dev-vars.yml
+
+  vars:
+    user_users:
+      - name: james
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/james
+      - name: andrey
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/andrey
+      - name: lucas
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/lucas
+      - name: joy
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/joy
+      - name: tairik
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/tairik
+      - name: jeremy
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/jeremy
+      - name: alex
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/alex
+      - name: shaheen
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/shaheen
+    ssh_keys_authorized_keys:
+      - owner: james
+        src: ssh-keys/james.pub
+      - owner: andrey
+        src: ssh-keys/andrey.pub
+      - owner: lucas
+        src: ssh-keys/lucas.pub
+      - owner: joy
+        src: ssh-keys/joy.pub
+      - owner: tairik
+        src: ssh-keys/tairik.pub
+      - owner: jeremy
+        src: ssh-keys/jeremy.pub
+      - owner: alex
+        src: ssh-keys/alex.pub
+      - owner: shaheen
+        src: ssh-keys/shaheen.pub
+
+  roles:
+    - tersmitten.user
+    - tersmitten.ssh-keys
+    # - tersmitten.sudoers
