@@ -36,5 +36,11 @@
   version: 2.1.0
 - src: tersmitten.postfix
   version: 1.5.1
+- src: tersmitten.ssh-keys
+  version: 2.0.3
+- src: tersmitten.sudoers
+  version: 1.0.1
 - src: tersmitten.swapfile
   version: 1.0.2
+- src: tersmitten.user
+  version: 1.1.0
