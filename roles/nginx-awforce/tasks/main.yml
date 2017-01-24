@@ -1,0 +1,19 @@
+---
+# Webroot
+- file: path={{ awforce_webroot }} state=directory
+- name: Create awforce default webroot
+  template:
+    src: index.html.j2
+    dest: "{{ awforce_webroot }}/index.html"
+    owner: "{{ aegir_user_name }}"
+    group: "{{ nginx_user }}"
+    mode: 0644
+
+# - file: path=/data/conf state=directory
+# - name: Create boa include
+#   template:
+#     src: global.inc.j2
+#     dest: "/data/conf/global.inc"
+#     owner: "{{ aegir_user_name }}"
+#     group: "{{ aegir_user_name }}"
+#     mode: 0644

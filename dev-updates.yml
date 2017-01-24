@@ -1,7 +1,6 @@
 ---
 - name: Verify default congiguration
-  hosts: 
-    - role_devnode
+  hosts: all
   become: yes
   vars_files:
     - ../ansible-dev-vars.yml
@@ -37,6 +36,8 @@
 
     - include: tasks/aegir-user.yml
 
+    - file: path={{ nginx_conf_path }}/aegir.conf state=absent
+
     # Make sure the ebs is mounted
     - file: path={{ ebs_mount_dir }} state=directory
     - filesystem: fstype=ext4 dev=/dev/xvdh opts="-c" resizefs=yes
@@ -44,6 +45,7 @@
 
   roles:
     - common
+    - nginx
     - { role: tersmitten.swapfile, swapfile_size: 4GiB, swapfile_file: "/swap" }
     - tersmitten.postfix
     - geerlingguy.git
@@ -82,38 +84,7 @@
         - "                      '$status $body_bytes_sent \"$http_referer\" '"
         - "                      '\"$http_user_agent\" \"$http_x_forwarded_for\"';"
         - "    access_log  {{ nginx_access_log }};"
-      notify:
-        - reload nginx
 
-- hosts: role_devnode
-  become: yes
-  vars_files:
-    - ../ansible-dev-vars.yml
-  roles:
-    - geerlingguy.composer
-    - geerlingguy.drush
-    - geerlingguy.drupal-console
-    - franklinkim.newrelic
-    - franklinkim.php5-newrelic
-
-- name: install aegir
-  become: yes
-  vars_files:
-    - ../ansible-dev-vars.yml
-  hosts: 
-    - aegir3_devnode
-  roles:
-    - aegir3-nginx
-
-- name: Configure nginx cluster
-  vars_files:
-    - ../ansible-dev-vars.yml
-  hosts: 
-    - role_devnode
-  become: yes
-  roles:
-    - geerlingguy.nginx
-  tasks:
     - name: Check symbolic link to Aegir's NGINX Config
       file:
         src: "{{ aegir_user_home }}/config/nginx.conf"
@@ -123,14 +94,34 @@
       notify:
         - reload nginx
 
-    - name: "Set hosts file"
-      lineinfile: dest=/etc/hosts regexp='.* {{ hostmaster_fqdn }}$' line="{{ hostvars[inventory_hostname].ansible_default_ipv4.address }} {{ hostmaster_fqdn }}" state=present
-      when: hostvars[inventory_hostname].ansible_default_ipv4.address is defined
+    - name: Update required drush packages.
+      command: "drush dl {{ item.key }}-{{ item.value }} --destination={{ aegir_user_home }}/.drush -y"
+      with_dict: "{{ aegir_drush_packages }}"
+      become: yes
+      become_user: "{{ aegir_user_name }}"
 
-- name: configure devnode
-  vars_files:
-    - ../ansible-dev-vars.yml
-  become: yes
-  hosts: aegir3_devnode
-  roles:
-    - {role: aegir3-saas, tags: saas}
+    - name: download provision patch
+      get_url:
+        url: https://www.drupal.org/files/issues/2829411-18.patch
+        dest: "{{ aegir_user_home }}/2829411-18.patch"
+
+    - name: apply provision patch
+      patch: >
+        src="{{ aegir_user_home }}/2829411-18.patch"
+        basedir="{{ aegir_user_home }}/.drush/provision"
+        remote_src=yes
+        strip=1
+
+    - name: Update makefile
+      template:
+        src: roles/aegir3-nginx/templates/aegir.make.yml.j2
+        dest: "{{ aegir_user_home }}/aegir.make.yml"
+        owner: "{{ aegir_user_name }}"
+        group: "{{ aegir_user_name }}"
+        force: yes
+        mode: 0644
+
+    - name: Update hostmaster.
+      command: "drush @hm hostmaster-migrate --http_service_type=nginx --makefile={{ aegir_user_home }}/aegir.make.yml {{ aegir_master_domain }} {{ aegir_user_home }}/hostmaster-{{ 2147483647 | random | to_uuid }} -y"
+      become: yes
+      become_user: "{{ aegir_user_name }}"

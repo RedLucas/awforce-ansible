@@ -1,7 +1,7 @@
 ---
   - name: Check if Aegir is installed
     stat: 
-      path: "{{ aegir_user_home }}/config"
+      path: "{{ aegir_user_home }}/.drush/hostmaster.alias.drushrc.php"
     register: aegir_installed
 
   - include: install_aegir.yml

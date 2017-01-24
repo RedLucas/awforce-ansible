@@ -1,0 +1,165 @@
+<?php # global settings.php
+
+
+/**
+ * Vars init
+ */
+$backdropcms  = FALSE;
+$custom_cache = FALSE;
+$custom_da    = FALSE;
+$custom_fb    = FALSE;
+$da_inc       = FALSE;
+$deny_anon    = FALSE;
+$drupal_eight = FALSE;
+$drupal_five  = FALSE;
+$drupal_seven = FALSE;
+$drupal_six   = FALSE;
+$high_traffic = FALSE;
+$ini_loc_src  = FALSE;
+$ini_plr_src  = FALSE;
+$is_backend   = FALSE;
+$is_bot       = FALSE;
+$is_dev       = FALSE;
+$is_install   = FALSE;
+$is_tmp       = FALSE;
+$raw_host     = FALSE;
+$redis_lock   = FALSE;
+$redis_path   = FALSE;
+$redis_up     = FALSE;
+$site_subdir  = FALSE;
+$use_redis    = FALSE;
+$usr_loc_ini  = FALSE;
+$usr_plr_ini  = FALSE;
+
+
+/**
+ * Detecting subdirectory mode
+ */
+if (isset($_SERVER['SITE_SUBDIR'])) {
+  $site_subdir = $_SERVER['SITE_SUBDIR'];
+}
+if (isset($_SERVER['RAW_HOST'])) {
+  $raw_host = $_SERVER['RAW_HOST'];
+}
+
+
+/**
+ * Backend and task detection
+ */
+if (function_exists('drush_get_command')) {
+  $command = drush_get_command();
+  $command = explode(" ", $command['command']);
+  if ($command && !preg_match("/^help/", $command[0])) {
+    $is_backend = TRUE;
+  }
+  if (preg_match("/^(provision-install|provision-save|provision-backup|php-eval)/", $command[0])) {
+    $is_install = TRUE;
+  }
+}
+
+
+/**
+ * Force backward compatible SERVER_SOFTWARE
+ */
+if (!$is_backend) {
+  if (isset($_SERVER['SERVER_SOFTWARE']) &&
+      !preg_match("/ApacheSolarisNginx/i", $_SERVER['SERVER_SOFTWARE'])) {
+    $_SERVER['SERVER_SOFTWARE'] = 'ApacheSolarisNginx/1.11.6';
+  }
+}
+
+
+/**
+ * Bots detection
+ */
+if (isset($_SERVER['HTTP_USER_AGENT']) &&
+    preg_match("/(?:crawl|bot|spider|tracker|click|parser|google|yahoo|yandex|baidu|bing)/i", $_SERVER['HTTP_USER_AGENT'])) {
+  $is_bot = TRUE;
+}
+
+
+/**
+ * Use Aegir/BOA specific MAIN_SITE_NAME instead of possibly fake SERVER_NAME
+ */
+if (isset($_SERVER['MAIN_SITE_NAME'])) {
+  $_SERVER['SERVER_NAME'] = $_SERVER['MAIN_SITE_NAME'];
+}
+
+
+/**
+ * Set MAIN_SITE_NAME to match SERVER_NAME, if MAIN_SITE_NAME is not set
+ */
+if (!isset($_SERVER['MAIN_SITE_NAME']) && isset($_SERVER['SERVER_NAME'])) {
+  $_SERVER['MAIN_SITE_NAME'] = $_SERVER['SERVER_NAME'];
+}
+
+
+/**
+ * Site mode detection and cron protection - cron works only for live sites
+ */
+if (preg_match("/^\/cron\.php/", $_SERVER['REQUEST_URI']) ||
+    preg_match("/^\/cron\//", $_SERVER['REQUEST_URI'])) {
+  if (isset($_SERVER['HTTP_HOST']) &&
+      (preg_match("/(?:^dev\.|\.dev\.)/i", $_SERVER['HTTP_HOST']) ||
+       preg_match("/(?:^devel\.|\.devel\.)/i", $_SERVER['HTTP_HOST']) ||
+       preg_match("/(?:^tmp\.|\.tmp\.)/i", $_SERVER['HTTP_HOST']) ||
+       preg_match("/(?:^temp\.|\.temp\.)/i", $_SERVER['HTTP_HOST']) ||
+       preg_match("/(?:^temporary\.|\.temporary\.)/i", $_SERVER['HTTP_HOST']) ||
+       preg_match("/(?:^test\.|\.test\.)/i", $_SERVER['HTTP_HOST']) ||
+       preg_match("/(?:^testing\.|\.testing\.)/i", $_SERVER['HTTP_HOST']))) {
+    $is_tmp = TRUE;
+    // Ignore cron requests
+    header('X-Accel-Expires: 300');
+    header('HTTP/1.0 404 Not Found');
+    header("Connection: close");
+    exit;
+  }
+}
+
+
+/**
+ * Dev mode detection and URLs protection - works only for aliases
+ */
+if (isset($_SERVER['HTTP_HOST']) &&
+    isset($_SERVER['MAIN_SITE_NAME']) &&
+    preg_match("/(?:^dev\.|\.dev\.|\.devel\.)/i", $_SERVER['HTTP_HOST']) &&
+    $_SERVER['HTTP_HOST'] != $_SERVER['MAIN_SITE_NAME'] &&
+    $_SERVER['HTTP_HOST'] != $_SERVER['SERVER_NAME'] &&
+    !$is_backend) {
+  $is_dev = TRUE;
+  if ($is_bot) {
+    // Deny known search bots on ^(dev|foo.(dev|devel)).domain subdomains
+    header('X-Accel-Expires: 60');
+    header("HTTP/1.1 301 Moved Permanently");
+    header("Location: http://www.aegirproject.org/");
+    header("Connection: close");
+    exit;
+  }
+}
+
+
+/**
+ * Required for proper Redis support on command line / via Drush
+ */
+if (isset($_SERVER['HTTP_HOST']) && !isset($_SERVER['SERVER_NAME'])) {
+  $_SERVER['SERVER_NAME'] = $_SERVER['HTTP_HOST'];
+}
+
+
+/**
+ * Fix for Mollom, CloudFlare and others running via Proxy
+ */
+if (isset($_SERVER['REMOTE_ADDR'])) {
+  if (isset($_SERVER['HTTP_X_FORWARDED_FOR']) &&
+      $_SERVER['HTTP_X_FORWARDED_FOR'] != "127.0.0.1") {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
+  }
+  if (isset($_SERVER['HTTP_X_REAL_IP']) &&
+      $_SERVER['HTTP_X_REAL_IP'] != "127.0.0.1") {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_REAL_IP'];
+  }
+  if (isset($_SERVER['HTTP_CF_CONNECTING_IP']) &&
+      $_SERVER['HTTP_CF_CONNECTING_IP'] != "127.0.0.1") {
+    $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_CF_CONNECTING_IP'];
+  }
+}

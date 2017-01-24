@@ -1,6 +1,8 @@
 ---
-- name: Verify default congiguration
-  hosts: all
+- name: Update default congiguration
+  hosts: 
+    - role_hub
+    - role_webnode
   become: yes
   vars_files:
     - ../ansible-vars.yml
@@ -73,7 +75,11 @@
   tasks:
     - name: Set php-cli version
       become: yes
-      shell: update-alternatives --set php /usr/bin/php5.6
+      shell: update-alternatives --set php /usr/bin/php7.0
+
+    - name: Enable php7.0-fpm
+      become: yes
+      systemd: name=php7.0-fpm enabled=yes masked=no state=started
 
     - name: Remove conflicting configuration from Geerlingguy's template
       lineinfile:
@@ -86,5 +92,50 @@
         - "                      '$status $body_bytes_sent \"$http_referer\" '"
         - "                      '\"$http_user_agent\" \"$http_x_forwarded_for\"';"
         - "    access_log  {{ nginx_access_log }};"
+
+    - name: Check symbolic link to Aegir's NGINX Config
+      file:
+        src: "{{ aegir_user_home }}/config/nginx.conf"
+        dest: "{{ nginx_conf_path }}/aegir.conf"
+        state: link
+        force: yes
       notify:
         - reload nginx
+
+- name: Update webnode
+  vars_files:
+    - ../ansible-vars.yml
+  become: yes
+  hosts: aegir3_webnode
+  tasks:
+    - name: Update required drush packages.
+      command: "drush dl {{ item.key }}-{{ item.value }} --destination={{ aegir_user_home }}/.drush -y"
+      with_dict: "{{ aegir_drush_packages }}"
+      become: yes
+      become_user: "{{ aegir_user_name }}"
+
+    - name: download provision patch
+      get_url:
+        url: https://www.drupal.org/files/issues/2829411-18.patch
+        dest: "{{ aegir_user_home }}/2829411-18.patch"
+
+    - name: apply provision patch
+      patch: >
+        src="{{ aegir_user_home }}/2829411-18.patch"
+        basedir="{{ aegir_user_home }}/.drush/provision"
+        remote_src=yes
+        strip=1
+
+    - name: Update makefile
+      template:
+        src: roles/aegir3-nginx/templates/aegir.make.yml.j2
+        dest: "{{ aegir_user_home }}/aegir.make.yml"
+        owner: "{{ aegir_user_name }}"
+        group: "{{ aegir_user_name }}"
+        force: yes
+        mode: 0644
+
+    - name: Update hostmaster.
+      command: "drush @hm hostmaster-migrate --http_service_type=nginx --makefile={{ aegir_user_home }}/aegir.make.yml {{ aegir_master_domain }} {{ aegir_user_home }}/hostmaster-{{ 2147483647 | random | to_uuid }} -y"
+      become: yes
+      become_user: "{{ aegir_user_name }}"

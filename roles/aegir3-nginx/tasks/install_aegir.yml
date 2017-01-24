@@ -64,6 +64,8 @@
 
 - name: Install required drush packages.
   command: "drush dl {{ item.key }}-{{ item.value }} --destination={{ aegir_user_home }}/.drush -y"
+  args:
+    creates: "{{ aegir_user_home }}/.drush/{{ item.key }}"
   with_dict: "{{ aegir_drush_packages }}"
   become: yes
   become_user: "{{ aegir_user_name }}"
@@ -90,7 +92,7 @@
 - name: Install Devmaster
   become: yes
   become_user: "{{ aegir_user_name }}"
-  command: "drush hostmaster-install --http_service_type=nginx --client_email={{ aegir_admin_email }} --aegir_db_host={{ aegir_mysql_host }} --aegir_db_pass={{ aegir_mysql_password }} --aegir_db_user={{ aegir_mysql_user }} --makefile={{ aegir_user_home }}/aegir.make.yml --aegir_host={{ hostmaster_fqdn }} -y --strict=0"
+  command: "drush hostmaster-install --http_service_type=nginx --client_email={{ aegir_admin_email }} --aegir_db_host={{ aegir_mysql_host }} --aegir_db_pass={{ aegir_mysql_password }} --aegir_db_user={{ aegir_mysql_user }} --makefile={{ aegir_user_home }}/aegir.make.yml --aegir_host={{ hostmaster_fqdn }} -y --strict=0 {{ aegir_master_domain }}"
   args:
     creates: "{{ aegir_user_home }}/.drush/hostmaster.alias.drushrc.php"
 

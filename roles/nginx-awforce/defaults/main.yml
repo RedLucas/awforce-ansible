@@ -1,0 +1,4 @@
+---
+awforce_webroot: /var/www/nginx-default
+aegir_user_name: aegir
+nginx_user: www-data

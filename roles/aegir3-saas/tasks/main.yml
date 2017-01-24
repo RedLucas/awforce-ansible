@@ -9,7 +9,7 @@
   - name: Download the SaaS modules from drupal.org
     shell: drush @hm dl -y {{ drush_dl | join(" ") }}
     args:
-      chdir: '{{ aegir_siteroot.stdout }}/sites/{{ hostmaster_fqdn }}'
+      chdir: '{{ aegir_siteroot.stdout }}/sites/{{ aegir_master_domain }}'
     become: yes
     become_user: "{{ aegir_user_name }}"
 
@@ -31,5 +31,5 @@
     changed_when: False
     register: network_node_credentials
 
-  - debug: var=network_node_credentials
-    when: network_node_credentials.exists
+  # - debug: var=network_node_credentials
+  #   when: network_node_credentials.exists

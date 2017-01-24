@@ -1,5 +1,6 @@
 ---
 aegir_admin_email: aegir@example.com
+aegir_master_domain: master.example.com
 
 aegir_mysql_host: localhost
 aegir_mysql_user: root
@@ -9,5 +10,5 @@ aegir_user_home: /var/aegir
 aegir_user_name: aegir
 
 aegir_drush_packages:
-  provision: 7.x-3.7
-  registry_rebuild: 7.x-2.3
+  provision: 7.x-3.9
+  registry_rebuild: 7.x-2.4

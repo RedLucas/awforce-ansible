@@ -1,14 +1,18 @@
 ---
-  - name: Install common packages
-    apt: pkg={{ item }} state=installed update_cache=true
-    with_items:
-      - build-essential
-      - curl
-      - htop
-      - ntp
-      - openssl
-      - tree
-      - vim
-      - mariadb-client-10.0
-      - ntpdate
-      - zip
+- name: Update apt cache.
+  apt: update_cache=yes cache_valid_time=86400
+  changed_when: false
+
+- name: Install common packages
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - build-essential
+    - curl
+    - htop
+    - ntp
+    - openssl
+    - tree
+    - vim
+    - mariadb-client-10.0
+    - ntpdate
+    - zip

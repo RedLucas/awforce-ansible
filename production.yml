@@ -52,6 +52,7 @@
 
   roles:
     - common
+    - nginx
     - geerlingguy.glusterfs
     - { role: tersmitten.swapfile, swapfile_size: 4GiB, swapfile_file: "{{ ebs_mount_dir }}/swap" }
     - tersmitten.postfix
@@ -75,21 +76,11 @@
   tasks:
     - name: Set php-cli version
       become: yes
-      shell: update-alternatives --set php /usr/bin/php5.6
+      shell: update-alternatives --set php /usr/bin/php7.0
 
-    - name: Remove conflicting configuration from Geerlingguy's template
-      lineinfile:
-        dest: '{{ nginx_conf_file_path }}'
-        line: '{{ item }}'
-        state: absent
-      with_items:
-        - "    server_names_hash_bucket_size 64;"
-        - "    log_format  main  '$remote_addr - $remote_user [$time_local] \"$request\" '"
-        - "                      '$status $body_bytes_sent \"$http_referer\" '"
-        - "                      '\"$http_user_agent\" \"$http_x_forwarded_for\"';"
-        - "    access_log  {{ nginx_access_log }};"
-      notify:
-        - reload nginx
+    - name: Enable php7.0-fpm
+      become: yes
+      systemd: name=php7.0-fpm enabled=yes masked=no state=started
 
 - name: Create hub gluster cluster
   become: yes
@@ -161,6 +152,7 @@
     - role_webnode
   become: yes
   roles:
+    - nginx
     - geerlingguy.nginx
   tasks:
     - name: Check symbolic link to Aegir's NGINX Config
