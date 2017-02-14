@@ -121,7 +121,7 @@
         force: yes
         mode: 0644
 
-    - name: Update hostmaster.
-      command: "drush @hm hostmaster-migrate --http_service_type=nginx --makefile={{ aegir_user_home }}/aegir.make.yml {{ aegir_master_domain }} {{ aegir_user_home }}/hostmaster-{{ 2147483647 | random | to_uuid }} -y"
-      become: yes
-      become_user: "{{ aegir_user_name }}"
+    # - name: Update hostmaster.
+    #   command: "drush @hm hostmaster-migrate --http_service_type=nginx --makefile={{ aegir_user_home }}/aegir.make.yml {{ aegir_master_domain }} {{ aegir_user_home }}/hostmaster-{{ 2147483647 | random | to_uuid }} -y"
+    #   become: yes
+    #   become_user: "{{ aegir_user_name }}"
