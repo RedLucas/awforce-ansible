@@ -79,6 +79,15 @@
           - sudo
           - www-data
         home: /var/aegir/platforms/shaheen
+      - name: dan
+        password: aw2017-
+        update_password: on_create
+        group: aegir
+        groups: 
+          - admin
+          - sudo
+          - www-data
+        home: /var/aegir/platforms/dan
     ssh_keys_authorized_keys:
       - owner: james
         src: ssh-keys/james.pub
@@ -96,6 +105,8 @@
         src: ssh-keys/alex.pub
       - owner: shaheen
         src: ssh-keys/shaheen.pub
+      - owner: dan
+        src: ssh-keys/dan.pub
 
   roles:
     - tersmitten.user
